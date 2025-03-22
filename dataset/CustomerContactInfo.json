@@ -1,0 +1,43 @@
+{
+	"name": "CustomerContactInfo",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Final_Orders",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "CustomerID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CustFirstName",
+				"type": "varchar"
+			},
+			{
+				"name": "CustLastName",
+				"type": "varchar"
+			},
+			{
+				"name": "Phone",
+				"type": "varchar"
+			},
+			{
+				"name": "AltEmail",
+				"type": "varchar"
+			},
+			{
+				"name": "Email",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "CustomerContactInfo"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

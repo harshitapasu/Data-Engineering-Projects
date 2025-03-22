@@ -1,0 +1,17 @@
+{
+	"name": "FinalOrder",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AllOrderDetails",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "AllOrderDetails"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

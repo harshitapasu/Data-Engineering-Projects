@@ -1,0 +1,17 @@
+{
+	"name": "ConversationInfo",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Final_Orders",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "ConversationInfo"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

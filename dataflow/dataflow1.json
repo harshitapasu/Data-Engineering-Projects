@@ -1,0 +1,368 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Customers",
+						"type": "DatasetReference"
+					},
+					"name": "ProcessedCusts"
+				},
+				{
+					"dataset": {
+						"referenceName": "Orders",
+						"type": "DatasetReference"
+					},
+					"name": "Orders"
+				},
+				{
+					"dataset": {
+						"referenceName": "OrderDetails",
+						"type": "DatasetReference"
+					},
+					"name": "OrderDetails"
+				},
+				{
+					"dataset": {
+						"referenceName": "NewCustomerInfo",
+						"type": "DatasetReference"
+					},
+					"name": "CoversationInfo"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "FinalOrder",
+						"type": "DatasetReference"
+					},
+					"name": "AllOrderDetails"
+				},
+				{
+					"dataset": {
+						"referenceName": "ConversationInfo",
+						"type": "DatasetReference"
+					},
+					"name": "Conversations"
+				},
+				{
+					"dataset": {
+						"referenceName": "CustomerContactInfo",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Cleaning"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "TotalSpent"
+				},
+				{
+					"name": "ConnectingInformation"
+				},
+				{
+					"name": "NameMismatch"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "CleanedNames"
+				},
+				{
+					"name": "FinalConversationInfo"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "sort1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "derivedColumn3"
+				},
+				{
+					"name": "union1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "select3"
+				},
+				{
+					"name": "Dis"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          CustomerID as string,",
+				"          Name as string,",
+				"          Email as string,",
+				"          Phone as string,",
+				"          LastPurchaseDate as string,",
+				"          TotalSpent as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> ProcessedCusts",
+				"source(output(",
+				"          orderid as integer,",
+				"          customerid as integer,",
+				"          orderdate as timestamp,",
+				"          paymentstatus as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> Orders",
+				"source(output(",
+				"          orderdetailid as integer,",
+				"          orderid as integer,",
+				"          productid as integer,",
+				"          quantity as integer,",
+				"          price as decimal(10,2)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> OrderDetails",
+				"source(output(",
+				"          CustomerID as short,",
+				"          Profile as (FirstName as string, LastName as string, Email as string),",
+				"          Conversations as (ConversationID as string, Messages as (DateTime as timestamp, Message as string, Sender as string, SupportAgent as string)[])[]",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     limit: 300,",
+				"     format: 'document',",
+				"     systemColumns: false) ~> CoversationInfo",
+				"ProcessedCusts derive(Email = replace(Email, '..', '.'),",
+				"          Phone = iif(     length(replace(replace(replace(replace(replace(toString(Phone), '(', ''), ')', ''), '-', ''), ' ', ''), '+', '')) == 10,     \r",
+				" concat(         substring(replace(replace(replace(replace(replace(toString(Phone), '(', ''), ')', ''), '-', ''), ' ', ''), '+', ''), 0, 3),    '-',   \r",
+				"       substring(replace(replace(replace(replace(replace(toString(Phone), '(', ''), ')', ''), '-', ''), ' ', ''), '+', ''), 3, 3),         '-',   \r",
+				"             substring(replace(replace(replace(replace(replace(toString(Phone), '(', ''), ')', ''), '-', ''), ' ', ''), '+', ''), 6, 4)     ),'NULL'),",
+				"          {Cust First Name} = split(\r",
+				"    replace(\r",
+				"        regexReplace(Name, `(?i)^(mr|mrs|ms|dr)\\.*\\s+`, ''), \r",
+				"        '.', ''\r",
+				"    ), \r",
+				"    ' '\r",
+				")[1],",
+				"          {Cust Last Name} = split(\r",
+				"    regexReplace(Name, `(?i)^(mr|mrs|ms|dr)\\.*\\s+`, ''), \r",
+				"    ' '\r",
+				")[2],",
+				"          LastPurchaseDate = concat(\r",
+				"    toString(split(LastPurchaseDate, '/')[3]),  \r",
+				"    '-',\r",
+				"    toString(split(LastPurchaseDate, '/')[1]),  \r",
+				"    '-',\r",
+				"    toString(split(LastPurchaseDate, '/')[2])   \r",
+				"),",
+				"          CustomerID = toInteger(CustomerID, '#', 'en-US'),",
+				"          TotalSpent = toFloat(TotalSpent, '#', 'en-US')) ~> Cleaning",
+				"Orders, OrderDetails join(Orders@orderid == OrderDetails@orderid,",
+				"     joinType:'outer',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 derive(OrderTotal = quantity*price,",
+				"          orderid = coalesce(OrderDetails@orderid,Orders@orderid)) ~> TotalSpent",
+				"Cleaning, FinalConversationInfo join(Cleaning@CustomerID == FinalConversationInfo@CustomerID,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> ConnectingInformation",
+				"sort1 split(or({Cust First Name}!={ConvoFirst Name},{Cust Last Name}!={ConvoLast Name}),",
+				"     disjoint: false) ~> NameMismatch@(Inconsistencies, NoInconsistencies)",
+				"CoversationInfo derive({Profile.Naming} = concat(Profile.FirstName,' ',Profile.LastName)) ~> derivedColumn1",
+				"derivedColumn1 derive({ConvoFirst Name} = split(\r",
+				"    replace(\r",
+				"        regexReplace({Profile.Naming}, `(?i)^(mr|mrs|ms|dr)\\.*\\s+`, ''), \r",
+				"        '.', ''\r",
+				"    ),\r",
+				"    ' '\r",
+				")[1],",
+				"          {ConvoLast Name} = split(\r",
+				"    replace(\r",
+				"        regexReplace({Profile.Naming}, `(?i)^(mr|mrs|ms|dr)\\.*\\s+`, ''), \r",
+				"        '.', ''\r",
+				"    ), \r",
+				"    ' '\r",
+				")[2],",
+				"          ConvoEmail = replace(Profile.Email, '..', '.')) ~> CleanedNames",
+				"CleanedNames select(mapColumn(",
+				"          CustomerID,",
+				"          {ConvoFirst Name},",
+				"          {ConvoLast Name},",
+				"          ConvoEmail",
+				"     ),",
+				"     partitionBy('hash', 1),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> FinalConversationInfo",
+				"ConnectingInformation select(mapColumn(",
+				"          CustomerID = Cleaning@CustomerID,",
+				"          {Cust First Name},",
+				"          {ConvoFirst Name},",
+				"          {Cust Last Name},",
+				"          {ConvoLast Name},",
+				"          Phone,",
+				"          Email,",
+				"          ConvoEmail",
+				"     ),",
+				"     partitionBy('hash', 1),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> select1",
+				"select1 sort(asc(CustomerID, true),",
+				"     partitionBy('hash', 1)) ~> sort1",
+				"NameMismatch@Inconsistencies derive({Real FirstName} = split(\r",
+				"    replace(\r",
+				"        regexReplace(Email, `(?i)^(mr|mrs|ms|dr)\\.*\\s+`, ''), \r",
+				"        '.', ' '\r",
+				"    ),\r",
+				"    ' '\r",
+				")[1],",
+				"          {Real LastName} = split(\r",
+				"    replace(\r",
+				"        regexReplace(split(Email, '@')[1], `(?i)^(mr|mrs|ms|dr)\\.*\\s+`, ''), \r",
+				"        '.', ' '\r",
+				"    ),\r",
+				"    ' '\r",
+				")[size(split(\r",
+				"    replace(\r",
+				"        regexReplace(split(Email, '@')[1], `(?i)^(mr|mrs|ms|dr)\\.*\\s+`, ''), \r",
+				"        '.', ' '\r",
+				"    ),\r",
+				"    ' '\r",
+				")) ],",
+				"     partitionBy('hash', 1)) ~> derivedColumn2",
+				"derivedColumn2 alterRow(updateIf(lower({Cust First Name})!=lower({Real FirstName})||lower({ConvoFirst Name})!=lower({Real FirstName})),",
+				"     updateIf(lower({Cust Last Name})!=lower({Real LastName})||lower({ConvoLast Name})!=lower({Real LastName}))) ~> alterRow1",
+				"alterRow1 derive({Cust First Name} = upper(substring({Real FirstName}, 1, 1)) + lower(substring({Real FirstName}, 2)),",
+				"          {ConvoFirst Name} = upper(substring({Real FirstName}, 1, 1)) + lower(substring({Real FirstName}, 2)),",
+				"          {Cust Last Name} = upper(substring({Real LastName}, 1, 1)) + lower(substring({Real LastName}, 2)),",
+				"          {ConvoLast Name} = upper(substring({Real LastName}, 1, 1)) + lower(substring({Real LastName}, 2)),",
+				"     partitionBy('hash', 1)) ~> derivedColumn3",
+				"derivedColumn3, NameMismatch@NoInconsistencies union(byName: true)~> union1",
+				"union1 select(mapColumn(",
+				"          CustomerID,",
+				"          {Cust First Name},",
+				"          {Cust Last Name},",
+				"          Phone,",
+				"          AltEmail = Email,",
+				"          Email = ConvoEmail",
+				"     ),",
+				"     partitionBy('hash', 1),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"Cleaning select(mapColumn(",
+				"          CustomerID,",
+				"          Name,",
+				"          Email,",
+				"          Phone,",
+				"          LastPurchaseDate,",
+				"          TotalSpent,",
+				"          {Cust First Name},",
+				"          {Cust Last Name}",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"CleanedNames foldDown(unrollMultiple(Conversations,Conversations.Messages),",
+				"     mapColumn(",
+				"          CustomerID,",
+				"          ConversationID = Conversations.ConversationID,",
+				"          DateTime = Conversations.Messages.DateTime,",
+				"          Message = Conversations.Messages.Message,",
+				"          Sender = Conversations.Messages.Sender,",
+				"          SupportAgent = Conversations.Messages.SupportAgent",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> Dis",
+				"TotalSpent sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     dateFormat:'MM-dd-yyyy',",
+				"     timestampFormat:'MM-dd-yyyy HH:mm:ss',",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          orderid,",
+				"          customerid,",
+				"          orderdate,",
+				"          paymentstatus,",
+				"          orderdetailid,",
+				"          productid,",
+				"          quantity,",
+				"          price,",
+				"          OrderTotal",
+				"     )) ~> AllOrderDetails",
+				"Dis sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          CustomerID,",
+				"          ConversationID,",
+				"          DateTime,",
+				"          Message,",
+				"          Sender,",
+				"          SupportAgent",
+				"     )) ~> Conversations",
+				"select2 sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     input(",
+				"          CustomerID as integer,",
+				"          CustFirstName as string,",
+				"          CustLastName as string,",
+				"          Phone as string,",
+				"          AltEmail as string,",
+				"          Email as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          CustomerID,",
+				"          CustFirstName = {Cust First Name},",
+				"          CustLastName = {Cust Last Name},",
+				"          Phone,",
+				"          AltEmail,",
+				"          Email",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}
