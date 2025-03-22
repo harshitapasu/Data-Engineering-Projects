@@ -1,0 +1,91 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "RealisticCustomers"
+		},
+		"AllOrderDetails_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AllOrderDetails'"
+		},
+		"Cust_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Cust'"
+		},
+		"CustomerInfo_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'CustomerInfo'"
+		},
+		"Final_Orders_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Final_Orders'"
+		},
+		"Order_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Order'"
+		},
+		"Product_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Product'"
+		},
+		"ProductsData_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ProductsData'"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "RealisticCustomers_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AllOrderDetails_connectionString": {
+						"value": "[parameters('AllOrderDetails_connectionString')]"
+					},
+					"Cust_connectionString": {
+						"value": "[parameters('Cust_connectionString')]"
+					},
+					"CustomerInfo_connectionString": {
+						"value": "[parameters('CustomerInfo_connectionString')]"
+					},
+					"Final_Orders_connectionString": {
+						"value": "[parameters('Final_Orders_connectionString')]"
+					},
+					"Order_connectionString": {
+						"value": "[parameters('Order_connectionString')]"
+					},
+					"Product_connectionString": {
+						"value": "[parameters('Product_connectionString')]"
+					},
+					"ProductsData_connectionString": {
+						"value": "[parameters('ProductsData_connectionString')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
