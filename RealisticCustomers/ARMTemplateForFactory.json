@@ -41,14 +41,14 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/CSV Data')]",
+			"name": "[concat(parameters('factoryName'), '/DataSources')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"description": "Cleaning CSV",
 				"activities": [
 					{
-						"name": "Data flow1",
+						"name": "Dataflow1",
 						"type": "ExecuteDataFlow",
 						"dependsOn": [],
 						"policy": {
@@ -61,17 +61,17 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "dataflow1",
+								"referenceName": "InterDataSrcs",
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
 									"ProcessedCusts": {},
-									"Orders": {},
+									"OrderPayments": {},
 									"OrderDetails": {},
 									"CoversationInfo": {},
 									"AllOrderDetails": {},
 									"Conversations": {},
-									"sink1": {}
+									"CustomerContactInfo": {}
 								}
 							},
 							"staging": {},
@@ -90,7 +90,7 @@
 				"lastPublishTime": "2025-03-22T07:24:15Z"
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/dataflow1')]"
+				"[concat(variables('factoryId'), '/dataflows/InterDataSrcs')]"
 			]
 		},
 		{
@@ -159,75 +159,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/Final_Orders')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/CustomerSupport')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ProductsData",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "CosmosDbSqlApiCollection",
-				"schema": {
-					"type": "object",
-					"properties": {
-						"CustomerID": {
-							"type": "integer"
-						},
-						"Profile": {
-							"type": "object",
-							"properties": {
-								"FirstName": {
-									"type": "string"
-								},
-								"LastName": {
-									"type": "string"
-								},
-								"Email": {
-									"type": "string"
-								}
-							}
-						},
-						"Conversations": {
-							"type": "array",
-							"items": {
-								"type": "object",
-								"properties": {
-									"ConversationID": {
-										"type": "string"
-									},
-									"Messages": {
-										"type": "array",
-										"items": {
-											"type": "object",
-											"properties": {
-												"DateTime": {
-													"type": "string"
-												},
-												"Sender": {
-													"type": "string"
-												},
-												"Message": {
-													"type": "string"
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				},
-				"typeProperties": {
-					"collectionName": "CustomerProf"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ProductsData')]"
 			]
 		},
 		{
@@ -472,148 +403,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/RealisticCust')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "Cust",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Json",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": "realistic_customers.json",
-						"container": "raw-data"
-					}
-				},
-				"schema": {
-					"type": "object",
-					"properties": {
-						"CustomerID": {
-							"type": "integer"
-						},
-						"Profile": {
-							"type": "object",
-							"properties": {
-								"FirstName": {
-									"type": "string"
-								},
-								"LastName": {
-									"type": "string"
-								},
-								"Email": {
-									"type": "string"
-								}
-							}
-						},
-						"Conversations": {
-							"type": "array",
-							"items": {
-								"type": "object",
-								"properties": {
-									"ConversationID": {
-										"type": "string"
-									},
-									"Messages": {
-										"type": "array",
-										"items": {
-											"type": "object",
-											"properties": {
-												"DateTime": {
-													"type": "string"
-												},
-												"Sender": {
-													"type": "string"
-												},
-												"Message": {
-													"type": "string"
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/Cust')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/RealisticCustomer')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ProductsData",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "CosmosDbSqlApiCollection",
-				"schema": {
-					"type": "object",
-					"properties": {
-						"CustomerID": {
-							"type": "integer"
-						},
-						"Profile": {
-							"type": "object",
-							"properties": {
-								"FirstName": {
-									"type": "string"
-								},
-								"LastName": {
-									"type": "string"
-								},
-								"Email": {
-									"type": "string"
-								}
-							}
-						},
-						"Conversations": {
-							"type": "array",
-							"items": {
-								"type": "object",
-								"properties": {
-									"ConversationID": {
-										"type": "string"
-									},
-									"Messages": {
-										"type": "array",
-										"items": {
-											"type": "object",
-											"properties": {
-												"DateTime": {
-													"type": "string"
-												},
-												"Sender": {
-													"type": "string"
-												},
-												"Message": {
-													"type": "string"
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				},
-				"typeProperties": {
-					"collectionName": "CustomerProf"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ProductsData')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/AllOrderDetails')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -706,7 +495,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
+			"name": "[concat(parameters('factoryName'), '/InterDataSrcs')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -725,7 +514,7 @@
 								"referenceName": "Orders",
 								"type": "DatasetReference"
 							},
-							"name": "Orders"
+							"name": "OrderPayments"
 						},
 						{
 							"dataset": {
@@ -762,7 +551,7 @@
 								"referenceName": "CustomerContactInfo",
 								"type": "DatasetReference"
 							},
-							"name": "sink1"
+							"name": "CustomerContactInfo"
 						}
 					],
 					"transformations": [
@@ -770,7 +559,7 @@
 							"name": "Cleaning"
 						},
 						{
-							"name": "join1"
+							"name": "JoinOrderInfo"
 						},
 						{
 							"name": "TotalSpent"
@@ -782,7 +571,7 @@
 							"name": "NameMismatch"
 						},
 						{
-							"name": "derivedColumn1"
+							"name": "JoiningNames"
 						},
 						{
 							"name": "CleanedNames"
@@ -794,25 +583,19 @@
 							"name": "select1"
 						},
 						{
-							"name": "sort1"
+							"name": "IndetifyingRealNames"
 						},
 						{
-							"name": "derivedColumn2"
-						},
-						{
-							"name": "alterRow1"
+							"name": "UpdatingIncorrectNames"
 						},
 						{
 							"name": "derivedColumn3"
 						},
 						{
-							"name": "union1"
+							"name": "AddingBackNames"
 						},
 						{
 							"name": "select2"
-						},
-						{
-							"name": "select3"
 						},
 						{
 							"name": "Dis"
@@ -839,7 +622,7 @@
 						"     allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     isolationLevel: 'READ_UNCOMMITTED',",
-						"     format: 'table') ~> Orders",
+						"     format: 'table') ~> OrderPayments",
 						"source(output(",
 						"          orderdetailid as integer,",
 						"          orderid as integer,",
@@ -886,22 +669,22 @@
 						"),",
 						"          CustomerID = toInteger(CustomerID, '#', 'en-US'),",
 						"          TotalSpent = toFloat(TotalSpent, '#', 'en-US')) ~> Cleaning",
-						"Orders, OrderDetails join(Orders@orderid == OrderDetails@orderid,",
-						"     joinType:'outer',",
+						"OrderPayments, OrderDetails join(OrderPayments@orderid == OrderDetails@orderid,",
+						"     joinType:'inner',",
 						"     matchType:'exact',",
 						"     ignoreSpaces: false,",
-						"     broadcast: 'auto')~> join1",
-						"join1 derive(OrderTotal = quantity*price,",
-						"          orderid = coalesce(OrderDetails@orderid,Orders@orderid)) ~> TotalSpent",
+						"     broadcast: 'auto')~> JoinOrderInfo",
+						"JoinOrderInfo derive(OrderTotal = quantity*price,",
+						"          orderid = coalesce(OrderDetails@orderid,OrderPayments@orderid)) ~> TotalSpent",
 						"Cleaning, FinalConversationInfo join(Cleaning@CustomerID == FinalConversationInfo@CustomerID,",
 						"     joinType:'inner',",
 						"     matchType:'exact',",
 						"     ignoreSpaces: false,",
 						"     broadcast: 'auto')~> ConnectingInformation",
-						"sort1 split(or({Cust First Name}!={ConvoFirst Name},{Cust Last Name}!={ConvoLast Name}),",
+						"select1 split(or({Cust First Name}!={ConvoFirst Name},{Cust Last Name}!={ConvoLast Name}),",
 						"     disjoint: false) ~> NameMismatch@(Inconsistencies, NoInconsistencies)",
-						"CoversationInfo derive({Profile.Naming} = concat(Profile.FirstName,' ',Profile.LastName)) ~> derivedColumn1",
-						"derivedColumn1 derive({ConvoFirst Name} = split(\r",
+						"CoversationInfo derive({Profile.Naming} = concat(Profile.FirstName,' ',Profile.LastName)) ~> JoiningNames",
+						"JoiningNames derive({ConvoFirst Name} = split(\r",
 						"    replace(\r",
 						"        regexReplace({Profile.Naming}, `(?i)^(mr|mrs|ms|dr)\\.*\\s+`, ''), \r",
 						"        '.', ''\r",
@@ -938,8 +721,6 @@
 						"     partitionBy('hash', 1),",
 						"     skipDuplicateMapInputs: false,",
 						"     skipDuplicateMapOutputs: false) ~> select1",
-						"select1 sort(asc(CustomerID, true),",
-						"     partitionBy('hash', 1)) ~> sort1",
 						"NameMismatch@Inconsistencies derive({Real FirstName} = split(\r",
 						"    replace(\r",
 						"        regexReplace(Email, `(?i)^(mr|mrs|ms|dr)\\.*\\s+`, ''), \r",
@@ -960,16 +741,16 @@
 						"    ),\r",
 						"    ' '\r",
 						")) ],",
-						"     partitionBy('hash', 1)) ~> derivedColumn2",
-						"derivedColumn2 alterRow(updateIf(lower({Cust First Name})!=lower({Real FirstName})||lower({ConvoFirst Name})!=lower({Real FirstName})),",
-						"     updateIf(lower({Cust Last Name})!=lower({Real LastName})||lower({ConvoLast Name})!=lower({Real LastName}))) ~> alterRow1",
-						"alterRow1 derive({Cust First Name} = upper(substring({Real FirstName}, 1, 1)) + lower(substring({Real FirstName}, 2)),",
+						"     partitionBy('hash', 1)) ~> IndetifyingRealNames",
+						"IndetifyingRealNames alterRow(updateIf(lower({Cust First Name})!=lower({Real FirstName})||lower({ConvoFirst Name})!=lower({Real FirstName})),",
+						"     updateIf(lower({Cust Last Name})!=lower({Real LastName})||lower({ConvoLast Name})!=lower({Real LastName}))) ~> UpdatingIncorrectNames",
+						"UpdatingIncorrectNames derive({Cust First Name} = upper(substring({Real FirstName}, 1, 1)) + lower(substring({Real FirstName}, 2)),",
 						"          {ConvoFirst Name} = upper(substring({Real FirstName}, 1, 1)) + lower(substring({Real FirstName}, 2)),",
 						"          {Cust Last Name} = upper(substring({Real LastName}, 1, 1)) + lower(substring({Real LastName}, 2)),",
 						"          {ConvoLast Name} = upper(substring({Real LastName}, 1, 1)) + lower(substring({Real LastName}, 2)),",
 						"     partitionBy('hash', 1)) ~> derivedColumn3",
-						"derivedColumn3, NameMismatch@NoInconsistencies union(byName: true)~> union1",
-						"union1 select(mapColumn(",
+						"derivedColumn3, NameMismatch@NoInconsistencies union(byName: true)~> AddingBackNames",
+						"AddingBackNames select(mapColumn(",
 						"          CustomerID,",
 						"          {Cust First Name},",
 						"          {Cust Last Name},",
@@ -980,18 +761,6 @@
 						"     partitionBy('hash', 1),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select2",
-						"Cleaning select(mapColumn(",
-						"          CustomerID,",
-						"          Name,",
-						"          Email,",
-						"          Phone,",
-						"          LastPurchaseDate,",
-						"          TotalSpent,",
-						"          {Cust First Name},",
-						"          {Cust Last Name}",
-						"     ),",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> select3",
 						"CleanedNames foldDown(unrollMultiple(Conversations,Conversations.Messages),",
 						"     mapColumn(",
 						"          CustomerID,",
@@ -1070,7 +839,7 @@
 						"          Phone,",
 						"          AltEmail,",
 						"          Email",
-						"     )) ~> sink1"
+						"     )) ~> CustomerContactInfo"
 					]
 				}
 			},
